@@ -6,8 +6,11 @@ import com.jhonatansouza.repositories.PlanetRepository;
 import java.util.List;
 
 import com.jhonatansouza.swapi.SwapiService;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -15,6 +18,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = Application.class)
@@ -23,6 +27,7 @@ import static org.junit.Assert.*;
 public class PlanetApiTest {
 
     private DynamoDBMapper dynamoDBMapper;
+    private final static String PLANET_NAME = "Alderaan";
     private final static Integer EXPECTED_MOVIES = 2;
     private final static String EXPECTED_NAME = "Mars XZY";
 
@@ -32,16 +37,24 @@ public class PlanetApiTest {
     @Autowired
     private PlanetRepository repository;
 
-    @Autowired
+    @Mock
     private SwapiService swapi;
+
+
+    @Before
+    public void init(){
+        MockitoAnnotations.initMocks(this);
+    }
 
     @Test
     public void saveTestCase() {
 
+        when(this.swapi.getMoviesAmount(PLANET_NAME))
+                .thenReturn(2);
 
         this.repository.save(this.pattern());
 
-        List<PlanetModel> planets = repository.findAllByName("Alderaan");
+        List<PlanetModel> planets = repository.findAllByName(PLANET_NAME);
 
         assertTrue("Not empty", !planets.isEmpty());
         assertTrue(planets.get(0).getMoviesAmount().equals(EXPECTED_MOVIES));
@@ -74,10 +87,10 @@ public class PlanetApiTest {
     private PlanetModel pattern(){
 
         PlanetModel planet = new PlanetModel();
-        planet.setName("Alderaan");
+        planet.setName(PLANET_NAME);
         planet.setTerrain("grasslands, mountains");
         planet.setClimate("temperate");
-        planet.setMoviesAmount(this.swapi.getMoviesAmount("Alderaan"));
+        planet.setMoviesAmount(this.swapi.getMoviesAmount(PLANET_NAME));
 
         return planet;
     }
