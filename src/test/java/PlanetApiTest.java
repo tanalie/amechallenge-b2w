@@ -1,20 +1,16 @@
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
-import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.jhonatansouza.Application;
 import com.jhonatansouza.models.PlanetModel;
 import com.jhonatansouza.repositories.PlanetRepository;
 import java.util.List;
 
 import com.jhonatansouza.swapi.SwapiService;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
@@ -24,10 +20,7 @@ import static org.junit.Assert.*;
 @SpringBootTest(classes = Application.class)
 @WebAppConfiguration
 @ActiveProfiles("local")
-@TestPropertySource(properties = {
-        "amazon.aws.accesskey=AKIAIQ3QP3EWITZCN3KA",
-        "amazon.aws.secretkey=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" })
-public class PlanetIntegrationTest {
+public class PlanetApiTest {
 
     private DynamoDBMapper dynamoDBMapper;
     private final static Integer EXPECTED_MOVIES = 2;
