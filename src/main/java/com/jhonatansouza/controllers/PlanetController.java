@@ -77,7 +77,7 @@ public class PlanetController {
             return ResponseEntity.ok(this.swapi.listPlanets(page));
         }
 
-        throw new PlanetException("Invalid page, the page must be greather than 0");
+        throw new PlanetException("Invalid page, the page must be great than 0");
 
     }
 
@@ -90,9 +90,15 @@ public class PlanetController {
     public PlanetDTO updatePlanet(@Valid @RequestBody PlanetDTO planet) throws PlanetException {
 
         if (StringUtils.isNotBlank(planet.getHashId())) {
-            return PlanetConverter.convertPlanetDTOFromModel(
-                    this.repository.save(PlanetConverter.convertPlanetModelFromDTO(planet)));
-        }
+
+            if(this.repository.exists(planet.getHashId())){
+                return PlanetConverter.convertPlanetDTOFromModel(
+                        this.repository.save(PlanetConverter.convertPlanetModelFromDTO(planet)));
+            }
+
+            throw new PlanetException( String.format( "This planet %s doesn't exist.", planet.getName()) );
+
+       }
 
         throw new PlanetException("id attribute is missing.");
     }
@@ -102,10 +108,10 @@ public class PlanetController {
 
         if (this.repository.exists(id)) {
             this.repository.delete(id);
-            return ResponseEntity.ok("Removed.");
+            return ResponseEntity.ok(String.format("Planet with id %s was Removed.",id) );
         }
 
-        throw new PlanetException("Planet with id {id} doesnt exist.");
+        throw new PlanetException(String.format("Planet with id %s doesn't exist.", id));
 
     }
 

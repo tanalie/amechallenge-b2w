@@ -3,6 +3,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.jhonatansouza.Application;
 import com.jhonatansouza.models.PlanetModel;
 import com.jhonatansouza.repositories.PlanetRepository;
+
 import java.util.List;
 
 import com.jhonatansouza.swapi.SwapiService;
@@ -42,7 +43,7 @@ public class PlanetApiTest {
 
 
     @Before
-    public void init(){
+    public void init() {
         MockitoAnnotations.initMocks(this);
     }
 
@@ -57,12 +58,13 @@ public class PlanetApiTest {
         List<PlanetModel> planets = repository.findAllByName(PLANET_NAME);
 
         assertTrue("Not empty", !planets.isEmpty());
+        assertFalse(planets.isEmpty());
         assertTrue(planets.get(0).getMoviesAmount().equals(EXPECTED_MOVIES));
 
     }
 
     @Test
-    public void deleteTestCase(){
+    public void deleteTestCase() {
 
         PlanetModel planet = this.repository.save(this.pattern());
         assertTrue(this.repository.exists(planet.getHashId()));
@@ -72,7 +74,7 @@ public class PlanetApiTest {
     }
 
     @Test
-    public void updateTestCase(){
+    public void updateTestCase() {
 
         PlanetModel planet = this.repository.save(this.pattern());
         planet.setName(EXPECTED_NAME);
@@ -83,8 +85,19 @@ public class PlanetApiTest {
 
     }
 
+    @Test
+    public void findTestCase() {
 
-    private PlanetModel pattern(){
+        PlanetModel pp = this.repository.save(this.pattern());
+        PlanetModel planet = this.repository.findOne(pp.getHashId());
+
+        assertTrue(planet != null);
+        this.repository.delete(pp.getHashId());
+
+    }
+
+
+    private PlanetModel pattern() {
 
         PlanetModel planet = new PlanetModel();
         planet.setName(PLANET_NAME);
@@ -93,6 +106,7 @@ public class PlanetApiTest {
         planet.setMoviesAmount(this.swapi.getMoviesAmount(PLANET_NAME));
 
         return planet;
+
     }
 
 

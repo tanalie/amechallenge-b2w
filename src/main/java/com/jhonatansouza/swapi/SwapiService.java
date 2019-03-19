@@ -1,6 +1,5 @@
 package com.jhonatansouza.swapi;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jhonatansouza.dto.SwapiPlanetsDTO;
 import com.jhonatansouza.exceptions.IndexOutRangeException;
 import com.jhonatansouza.exceptions.SwapiException;
@@ -8,7 +7,10 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Arrays;
 
 @Service
 public class SwapiService {
@@ -19,23 +21,20 @@ public class SwapiService {
 
         try {
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("userAgent", "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:65.0) Gecko/20100101 Firefox/65.0");
-            headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-
-            HttpEntity<String> entity = new HttpEntity<String>("parameters", headers);
-            RestTemplate restTemplate = new RestTemplate();
-
-            ResponseEntity<HashMap> result = restTemplate.exchange(SWAPI_REST.concat("?search=").concat(planetName), HttpMethod.GET, entity, HashMap.class);
+            ResponseEntity<HashMap> result = this.createConnection(SWAPI_REST.concat("?search=").concat(planetName));
             List rBody = (List) result.getBody().get("results");
 
-            if (rBody.isEmpty()) {
-                return 0;
+            if(result.getStatusCode().equals(HttpStatus.OK)){
+                if (rBody.isEmpty()) {
+                    return 0;
+                }
+
+                List movies = ((List) ((Map) rBody.get(0)).get("films"));
+
+                return movies.size();
             }
 
-            List movies = ((List) ((Map) rBody.get(0)).get("films"));
-
-            return movies.size();
+            throw new SwapiException("Swapi indisponible.");
         } catch (Exception e) {
             return 0;
         }
@@ -44,25 +43,16 @@ public class SwapiService {
 
     public SwapiPlanetsDTO listPlanets(Integer page) throws SwapiException, IndexOutRangeException {
 
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("userAgent", "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:65.0) Gecko/20100101 Firefox/65.0");
-        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-
-        HttpEntity<String> entity = new HttpEntity<String>("parameters", headers);
-        RestTemplate restTemplate = new RestTemplate();
-
         ResponseEntity<HashMap> result;
 
         try {
-            result = restTemplate.exchange(SWAPI_REST.concat("?page=" + page), HttpMethod.GET, entity, HashMap.class);
+            result = this.createConnection(SWAPI_REST.concat("?page=" + page));
         } catch (Exception ex) {
             throw new IndexOutRangeException(" No result to index " + page);
         }
 
         if (result.getStatusCode().equals(HttpStatus.OK)) {
             List content = (List) result.getBody().get("results");
-            ObjectMapper obj = new ObjectMapper();
             SwapiPlanetsDTO swapiData = new SwapiPlanetsDTO();
             swapiData.setResults(content);
             swapiData.setLength(content.size());
@@ -71,5 +61,16 @@ public class SwapiService {
         }
 
         throw new SwapiException("Failed to retrieve data of swapi.");
+    }
+
+    private ResponseEntity<HashMap> createConnection(String endpoint) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("userAgent", "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:65.0) Gecko/20100101 Firefox/65.0");
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+
+        HttpEntity<String> entity = new HttpEntity<String>("parameters", headers);
+        RestTemplate restTemplate = new RestTemplate();
+
+        return restTemplate.exchange(endpoint, HttpMethod.GET, entity, HashMap.class);
     }
 }
