@@ -42,7 +42,7 @@ public class PlanetController {
     }
 
     @RequestMapping(value = "/", method = RequestMethod.POST)
-    public PlanetDTO insertPlanet(@Valid @RequestBody PlanetDTO planet, Errors errors) throws PlanetException {
+    public PlanetDTO insertPlanet(@RequestBody PlanetDTO planet, Errors errors) throws PlanetException {
 
         if (errors.hasFieldErrors()) {
             throw new PlanetException("Verify all obligatory fields.");
@@ -82,12 +82,12 @@ public class PlanetController {
     }
 
     @RequestMapping(value = "/name/{name}", method = RequestMethod.GET)
-    public List<PlanetModel> findByName(@Valid @NotNull @PathVariable String name) {
+    public List<PlanetModel> findByName(@PathVariable String name) {
         return this.repository.findAllByName(name);
     }
 
     @RequestMapping(value = "/", method = RequestMethod.PUT)
-    public PlanetDTO updatePlanet(@Valid @RequestBody PlanetDTO planet) throws PlanetException {
+    public PlanetDTO updatePlanet(@RequestBody PlanetDTO planet) throws PlanetException {
 
         if (StringUtils.isNotBlank(planet.getHashId())) {
 
@@ -104,7 +104,7 @@ public class PlanetController {
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
-    public ResponseEntity<String> removePlanet(@NotNull @PathVariable("id") String id) throws PlanetException {
+    public ResponseEntity<String> removePlanet(@PathVariable("id") String id) throws PlanetException {
 
         if (this.repository.exists(id)) {
             this.repository.delete(id);
